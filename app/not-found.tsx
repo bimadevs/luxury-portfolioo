@@ -1,130 +1,106 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 
 export default function NotFound() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [isHovered, setIsHovered] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    setIsMounted(true)
+    
+    const updateMousePosition = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY })
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mousemove', updateMousePosition)
+
+    return () => {
+      window.removeEventListener('mousemove', updateMousePosition)
+    }
   }, [])
 
+  if (!isMounted) {
+    return null // atau loading state
+  }
+
   return (
-    <div className="relative min-h-screen bg-black text-white overflow-hidden">
-      {/* Background Grid */}
-      <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 opacity-10">
-        {[...Array(144)].map((_, i) => (
+    <div className="relative min-h-screen w-full bg-black overflow-hidden">
+      {/* Grid Background */}
+      <div
+        className="absolute inset-0 grid grid-cols-[repeat(auto-fill,minmax(40px,1fr))] grid-rows-[repeat(auto-fill,minmax(40px,1fr))] opacity-20"
+        style={{
+          transform: `perspective(500px) rotateX(${
+            (mousePosition.y - window.innerHeight / 2) / 50
+          }deg) rotateY(${(mousePosition.x - window.innerWidth / 2) / 50}deg)`,
+        }}
+      >
+        {Array.from({ length: 200 }).map((_, i) => (
           <div
             key={i}
-            className="border border-white/20"
-            style={{
-              transform: `rotate(${
-                Math.atan2(
-                  mousePosition.y - (i % 12) * 100,
-                  mousePosition.x - Math.floor(i / 12) * 100
-                ) * (180 / Math.PI)
-              }deg)`,
-              transition: 'transform 0.5s ease-out',
-            }}
+            className="border border-gray-700/50"
           />
         ))}
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen">
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center"
+          className="text-9xl font-bold text-white mb-8 relative"
         >
-          {/* Glitch Effect */}
-          <div className="relative mb-8">
-            <h1 className="text-[12rem] font-bold leading-none tracking-tighter">
-              <span className="relative inline-block">
-                <span className="absolute -inset-2 animate-glitch-1 text-red-500 opacity-70 blur-[2px]">404</span>
-                <span className="absolute -inset-2 animate-glitch-2 text-blue-500 opacity-70 blur-[2px]">404</span>
-                <span className="relative">404</span>
-              </span>
-            </h1>
-          </div>
+          <span className="absolute -inset-2 text-red-500 opacity-50 animate-[glitch-1_5s_infinite]">404</span>
+          <span className="absolute -inset-2 text-blue-500 opacity-50 animate-[glitch-2_5s_infinite]">404</span>
+          404
+        </motion.h1>
 
-          {/* Message */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="space-y-4 mb-12"
-          >
-            <h2 className="text-3xl font-light">Oops! Sepertinya Anda Tersesat</h2>
-            <p className="text-gray-400 max-w-md mx-auto">
-              Halaman yang Anda cari mungkin telah dipindahkan ke dimensi lain. 
-              Mari kembali ke dunia yang kita kenal.
-            </p>
-          </motion.div>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-gray-400 text-xl mb-8 text-center"
+        >
+          Sepertinya Anda tersesat di dunia digital.
+          <br />
+          Mari kembali ke jalan yang benar.
+        </motion.p>
 
-          {/* Interactive Button */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Link
+            href="/"
+            className="px-8 py-3 bg-white text-black rounded-full font-medium hover:scale-105 transition-transform inline-block"
           >
-            <Link
-              href="/"
-              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-white/10 px-8 py-4 transition-all duration-300 hover:bg-white/20"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              <span className="relative z-10 text-white transition-transform duration-300 group-hover:translate-x-1">
-                Kembali ke Beranda
-              </span>
-              <svg
-                className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 5l7 7-7 7M5 5l7 7-7 7"
-                />
-              </svg>
-              <div className="absolute inset-0 z-0 bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 transition-opacity duration-300 group-hover:opacity-20" />
-            </Link>
-          </motion.div>
+            Kembali ke Beranda
+          </Link>
         </motion.div>
       </div>
 
       {/* Floating Particles */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {Array.from({ length: 20 }).map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-2 h-2 bg-white rounded-full"
-            initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-            }}
             animate={{
-              x: [null, Math.random() * window.innerWidth],
-              y: [null, Math.random() * window.innerHeight],
+              x: [0, Math.random() * window.innerWidth],
+              y: [0, Math.random() * window.innerHeight],
             }}
             transition={{
-              duration: Math.random() * 10 + 10,
+              duration: Math.random() * 10 + 5,
               repeat: Infinity,
-              ease: "linear"
+              repeatType: "reverse",
             }}
             style={{
-              opacity: Math.random() * 0.5 + 0.2
+              left: Math.random() * 100 + '%',
+              top: Math.random() * 100 + '%',
             }}
           />
         ))}
